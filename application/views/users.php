@@ -16,13 +16,25 @@
 					</div>
 				</div>
 			</div>
+			<div class="input-group ps-5">
+				<div id="navbar-search-autocomplete" class="form-outline">
 			<form method='post' action="<?php echo base_url('/users') ?>">
 				<input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>"
 					   value="<?php echo $this->security->get_csrf_hash(); ?>">
-				<input type='text' style="margin-bottom: 2px;" name='search' id='search' value='<?= $search ?>'>
+				<input type="search" name="search" id="search" class="form-control" value='<?= $search ?>'>
+				</div>
+				<button type="button" class="btn btn-primary">
+					<i class="fa fa-search"></i>
+				</button>
+				</div>
+			</div>
 			</form>
+
 			<table class="table table-striped table-hover">
 				<thead>
+
+				</div>
+		</div>
 				<tr>
 					<th>ID</th>
 					<th>
