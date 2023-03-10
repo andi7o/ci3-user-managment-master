@@ -18,7 +18,7 @@
 						<i class="nav-icon fas fa-tachometer-alt"></i>
 						<p>
 							Dashboard
-							<i class="fa fa-angle-left" aria-hidden="true" style="margin-left: 120px; font-weight: 900;"></i>
+<!--							<i class="fa fa-angle-left" aria-hidden="true" style="margin-left: 120px; font-weight: 900;"></i>-->
 
 						</p>
 					</a>

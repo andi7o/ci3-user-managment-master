@@ -31,68 +31,42 @@ class Users extends MY_Controller
 		$this->load->library('pagination');
 	}
 
+	// in the controller
 
 	public function index()
 	{
-		$per_page = $this->input->get('per_page');
 
-		if ($per_page) {
-			$this->session->set_userdata('per_page', $per_page);
-		}
-		if ($this->session->userdata('per_page')) {
-			$per_page = $this->session->userdata('per_page');
-		} else {
-// Postavljamo zadanu vrijednost ako vrijednost per_page nije postavljena u sesiji
-			$per_page = 4;
-		}
 
-// Dobivamo vrijednost pomaka iz URL segmenta
-		$offset = $this->uri->segment(3);
 
-		// Configure pagination settings
-		$config['base_url'] = 'http://ci3-user-managment-system.test/users/index';
-		$config['per_page'] = $per_page;
-		$config['num_links'] = 3;
-		$config['total_rows'] = $this->db->get('users')->num_rows();
+		$per_page = $this->input->get('per_page') ?? 4;
+		$per_page = ($this->input->post('per_page')) ? $this->input->post('per_page') : $per_page;
+		$sort_by = $this->input->get('sort_by') ?? 'id';
+		$sort_order = $this->input->get('sort_order') ?? 'asc';
 
-		$config['full_tag_open'] = '<ul class="pagination">';
-		$config['full_tag_close'] = '</ul>';
+        $search_text = $this->input->post('search');
 
-		$config['first_link'] = 'First';
-		$config['first_tag_open'] = '<li class="page-item">';
-		$config['first_tag_close'] = '</li>';
+		$total_rows = $this->db->get('users')->num_rows();
+		$total_pages = ceil($total_rows / $per_page);
+		$current_page = $this->uri->segment(3) ? $this->uri->segment(3) : 1;
 
-		$config['last_link'] = 'Last';
-		$config['last_tag_open'] = '<li class="page-item">';
-		$config['last_tag_close'] = '</li>';
+		$start_page = max($current_page - 2, 1);
+		$end_page = min($current_page + 2, $total_pages);
 
-		$config['next_link'] = 'Next';
-		$config['next_tag_open'] = '<li class="page-item">';
-		$config['next_tag_close'] = '</li>';
-
-		$config['prev_link'] = 'Previous';
-		$config['prev_tag_open'] = '<li class="page-item">';
-		$config['prev_tag_close'] = '</li>';
-
-		$config['num_tag_open'] = '<li class="page-item">';
-		$config['num_tag_close'] = '</li>';
-
-		$config['cur_tag_open'] = '<li class="page-item active"><a class="page-link" href="#">';
-		$config['cur_tag_close'] = '</a></li>';
-
-		// Initialize pagination library with configuration settings
-		$this->pagination->initialize($config);
-
-		// Get the users data with limit and offset using the model
-		$data['users'] = $this->UserModel->get_users($per_page, $offset);
-
+		// Pass the sorting parameters to the get_users method
+		$offset = ($current_page - 1) * $per_page;
+		$users = $this->UserModel->get_users($per_page, $current_page, $sort_by, $sort_order,$search_text, $offset);
+		$data['search'] = $search_text;
+		$data['current_page'] = $current_page;
+		$data['total_pages'] = $total_pages;
+		$data['start_page'] = $start_page;
+		$data['end_page'] = $end_page;
+		$data['users'] = $users;
 		$data['per_page'] = $per_page;
-		$data['total_rows'] = $config['total_rows'];
-		$data['pagination'] = $this->pagination->create_links();
-
+		$data['total_rows'] = $total_rows;
+		$data['sort_by'] = $sort_by;
+		$data['sort_order'] = $sort_order;
 		$this->load->view('users', $data);
 	}
-
 
 	public function create()
 	{

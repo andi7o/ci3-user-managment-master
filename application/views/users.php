@@ -16,12 +16,29 @@
 					</div>
 				</div>
 			</div>
+			<form method='post' action="<?php echo base_url('/users') ?>">
+				<input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>"
+					   value="<?php echo $this->security->get_csrf_hash(); ?>">
+				<input type='text' style="margin-bottom: 2px;" name='search' id='search' value='<?= $search ?>'>
+			</form>
 			<table class="table table-striped table-hover">
 				<thead>
 				<tr>
 					<th>ID</th>
-					<th>Name</th>
-					<th>Email</th>
+					<th>
+					<a href="?current_page=<?php echo $current_page; ?>&per_page=<?php echo $per_page; ?>&sort_by=name&amp;sort_order=<?php echo ($sort_by == 'name' && $sort_order == 'asc') ? 'desc' : 'asc'; ?>">
+						Name <?php if ($sort_by == 'name') { ?>
+							<i class="fa fa-sort-<?php echo ($sort_order == 'asc') ? 'up' : 'down'; ?>"></i>
+						<?php } ?>
+					</a>
+					</th>
+					<th>
+						<a href="?current_page=<?php echo $current_page; ?>&per_page=<?php echo $per_page; ?>&sort_by=email&amp;sort_order=<?php echo ($sort_by == 'email' && $sort_order == 'asc') ? 'desc' : 'asc'; ?>">
+							Email <?php if ($sort_by == 'email') { ?>
+								<i class="fa fa-sort-<?php echo ($sort_order == 'asc') ? 'up' : 'down'; ?>"></i>
+							<?php } ?>
+						</a>
+					</th>
 					<th>created_At</th>
 					<th>Actions</th>
 				</tr>
@@ -102,42 +119,59 @@
 
 		<div class="clearfix">
 			<div class="hint-text">
-				<form action="<?php echo site_url('users/index'); ?>" method="get" id="form-per-page">
-					<label for="per_page">Entries per view:</label>
-					<select name="per_page" id="per_page">
-						<option value="4" <?php if ($per_page == 4) {
-							echo 'selected';
-						} ?>>4
-						</option>
-						<option value="8" <?php if ($per_page == 8) {
-							echo 'selected';
-						} ?>>8
-						</option>
-						<option value="12" <?php if ($per_page == 12) {
-							echo 'selected';
-						} ?>>12
-						</option>
+				<form action="<?= site_url('users') ?>" method="post">
+					<input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>"
+						   value="<?php echo $this->security->get_csrf_hash(); ?>">
+					<label for="per_page" class="mr-2">Per page:</label>
+					<select name="per_page" id="per_page" class="btn btn-secondary dropdown-toggle" onchange="this.form.submit()">
+						<option value="4" <?= ($per_page == 4) ? 'selected' : '' ?>>4</option>
+						<option value="6" <?= ($per_page == 6) ? 'selected' : '' ?>>6</option>
+						<option value="8" <?= ($per_page == 8) ? 'selected' : '' ?>>8</option>
 					</select>
 				</form>
 			</div>
 
+			<ul class="pagination">
+				<?php if ($current_page > 1): ?>
+					<li class="page-item"><a class="page-link"
+											 href="<?= base_url() ?>users/index/1?per_page=<?= $per_page ?>">First</a>
+					</li>
+				<?php endif; ?>
 
-			<?php echo $pagination; ?>
+				<?php if ($current_page > 1): ?>
+					<li class="page-item"><a class="page-link"
+											 href="<?= base_url() ?>users/index/<?= $current_page - 1 ?>?per_page=<?= $per_page ?>">Previous</a>
+					</li>
+				<?php endif; ?>
+
+				<?php for ($i = $start_page; $i <= $end_page; $i++): ?>
+					<?php if ($current_page == $i): ?>
+						<li class="page-item active"><a class="page-link" href="#"><?= $i ?></a></li>
+					<?php else: ?>
+						<li class="page-item"><a class="page-link"
+												 href="<?= base_url() ?>users/index/<?= $i ?>?per_page=<?= $per_page ?>&"><?= $i ?></a>
+						</li>
+					<?php endif; ?>
+				<?php endfor; ?>
+
+				<?php if ($current_page < $total_pages - 0): ?>
+					<li class="page-item"><a class="page-link"
+											 href="<?= base_url() ?>users/index/<?= $current_page + 1 ?>?per_page=<?= $per_page ?>">Next</a>
+					</li>
+				<?php endif; ?>
+
+				<?php if ($current_page < $total_pages && $current_page >= 1): ?>
+					<li class="page-item"><a class="page-link"
+											 href="<?= base_url() ?>users/index/<?= $total_pages ?>?per_page=<?= $per_page ?>">Last</a>
+					</li>
+				<?php endif; ?>
+			</ul>
+
+
+
+
 		</div>
 	</div>
 </div>
 </div>
 
-<script>
-	$(document).ready(function () {
-		// Handle click event on Delete button
-		$("#deleteButton<?= $user->id ?>").click(function () {
-			// Get the ID of the user to be deleted
-			var userId = <?= $user->id ?>;
-
-			// Set the form action URL dynamically based on the user ID
-			var formAction = "<?php echo base_url('/users/deleteUser/') ?>" + userId;
-			$(".delete-form").attr("action", formAction);
-		});
-	});
-</script>

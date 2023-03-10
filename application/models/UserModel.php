@@ -7,21 +7,31 @@ class UserModel extends CI_Model
 
 	public function __construct()
 	{
+		parent::__construct();
 		$this->load->database();
 	}
 
-//	public function get_users($per_page, $offset)
-//	{
-//		$this->db->limit($per_page, $offset);
-//		$query = $this->db->get('users');
-//		return $query->result();
-//	}
-	public function get_users($limit, $offset) {
-		echo "limit = $limit<br>";
-		echo "offset = $offset<br>";
-		$query = $this->db->get('users', $limit, $offset);
-		var_dump($query->result());
-		return $query->result();
+	public function get_users($limit, $page_number, $sort_by, $sort_order, $search)
+	{
+		$offset = ($page_number - 1) * $limit;
+		$this->db->limit($limit, $offset);
+		if($search != ''){
+			$this->db->like('name', $search);
+			$this->db->or_like('email', $search);
+		}
+		$data = $this->db->get('users')->result();
+
+		if(isset($sort_by))
+		usort($data, function($a, $b) use ($sort_by, $sort_order) {
+			$a = (array) $a;
+			$b = (array) $b;
+			if($sort_order == 'asc')
+				return strcmp($a[$sort_by], $b[$sort_by]);
+			else
+				return strcmp($a[$sort_by], $b[$sort_by]) * -1;
+
+		});
+		return $data;
 	}
 
 	public function get_user_by_id($id)
@@ -33,7 +43,7 @@ class UserModel extends CI_Model
 	public function createUser($data)
 	{
 		return $this->db->insert('users', $data);
-		$lastId = $this->db->insert_id(); /* get last inserted id */
+//		$lastId = $this->db->insert_id(); /* get last inserted id */
 
 	}
 
@@ -67,4 +77,20 @@ class UserModel extends CI_Model
 		$this->created_at = date('d.m.Y');
 
 	}
+	public function getrecordCount($search = '') {
+
+		$this->db->select('count(*) as allcount');
+		$this->db->from('users');
+
+		if($search != ''){
+			$this->db->like('name', $search);
+			$this->db->or_like('email', $search);
+		}
+
+		$query = $this->db->get();
+		$result = $query->result_array();
+
+		return $result[0]['allcount'];
+	}
+
 }
